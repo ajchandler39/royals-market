@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Conversation')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+
+<main class="container container-narrow">
+    <p><a th:href="@{/messages}">← All messages</a></p>
+
+    <div class="panel">
+        <div class="row-actions" style="justify-content:space-between">
+            <h2 style="margin:0" th:text="${other.username}">other</h2>
+            <a th:if="${conversation.listing != null}" th:href="@{/listings/{id}(id=${conversation.listing.id})}"
+               class="muted" th:text="'re: ' + ${conversation.listing.title}">re: listing</a>
+        </div>
+
+        <div class="chat">
+            <div th:each="m : ${messages}"
+                 th:classappend="${m.sender.id == me.id} ? 'msg msg-me' : 'msg msg-them'">
+                <div class="who" th:text="${m.sender.username} + ' · ' + ${#temporals.format(m.sentAt, 'MMM d, HH:mm')}">who</div>
+                <div th:text="${m.body}" style="white-space:pre-wrap">body</div>
+            </div>
+            <div th:if="${#lists.isEmpty(messages)}" class="muted">No messages yet — say hello!</div>
+        </div>
+
+        <form th:action="@{/messages/{id}(id=${conversation.id})}" th:object="${form}" method="post" class="chat-form">
+            <textarea th:field="*{body}" placeholder="Type a message…" required></textarea>
+            <button class="btn btn-purple">Send</button>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

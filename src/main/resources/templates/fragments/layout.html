@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="|${title} · RoyalsMarket|">RoyalsMarket</title>
+    <meta name="_csrf" th:content="${_csrf != null} ? ${_csrf.token} : ''"/>
+    <meta name="_csrf_header" th:content="${_csrf != null} ? ${_csrf.headerName} : ''"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+    <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+    <!-- app.js must load BEFORE Alpine so its alpine:init listener (which registers
+         the countdown component) is in place before Alpine starts. -->
+    <script th:src="@{/js/app.js}" defer></script>
+    <script src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js" defer></script>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav th:fragment="nav" class="nav">
+    <div class="nav-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-crown">♛</span> Royals<span class="brand-accent">Market</span>
+        </a>
+        <div class="nav-links">
+            <a th:href="@{/}">Browse</a>
+            <a th:if="${currentUser != null}" th:href="@{/listings/new}" class="btn btn-sm btn-gold">+ Sell an item</a>
+            <a th:if="${currentUser != null}" th:href="@{/messages}" class="nav-msg">
+                Messages
+                <span th:if="${unreadCount > 0}" class="badge" th:text="${unreadCount}">0</span>
+            </a>
+            <a th:if="${currentUser != null}" th:href="@{/listings/mine}">My listings</a>
+            <a th:if="${currentUser != null}" th:href="@{/profile}" th:text="${currentUser.username}">me</a>
+            <form th:if="${currentUser != null}" th:action="@{/logout}" method="post" class="inline-form">
+                <button type="submit" class="btn btn-sm btn-ghost">Log out</button>
+            </form>
+            <a th:if="${currentUser == null}" th:href="@{/login}">Log in</a>
+            <a th:if="${currentUser == null}" th:href="@{/register}" class="btn btn-sm btn-gold">Sign up</a>
+        </div>
+    </div>
+</nav>
+
+<!-- ============ FLASH ============ -->
+<div th:fragment="flash" class="flash-wrap">
+    <div th:if="${flash}" class="flash flash-ok" th:text="${flash}"></div>
+    <div th:if="${error}" class="flash flash-err" th:text="${error}"></div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer th:fragment="footer" class="footer">
+    <p>RoyalsMarket — a player marketplace. Trades are arranged and completed in-game.</p>
+</footer>
+
+</body>
+</html>

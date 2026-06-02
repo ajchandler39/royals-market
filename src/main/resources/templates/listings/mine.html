@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My listings')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <div class="row-actions" style="justify-content:space-between">
+        <h1>My listings</h1>
+        <a th:href="@{/listings/new}" class="btn btn-gold">+ Sell an item</a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(listings)}" class="empty">
+        <span class="big">📦</span>
+        You haven't listed anything yet.
+    </div>
+
+    <div th:unless="${#lists.isEmpty(listings)}" class="stack" style="margin-top:1rem">
+        <div class="convo-item" th:each="l : ${listings}">
+            <div>
+                <a th:href="@{/listings/{id}(id=${l.id})}" th:text="${l.title}" style="font-weight:600">Title</a>
+                <div class="card-meta" style="gap:0.5rem">
+                    <span th:if="${l.isAuction()}" class="tag tag-auction">Auction</span>
+                    <span th:unless="${l.isAuction()}" class="tag tag-sale">Sale</span>
+                    <span class="tag"
+                          th:classappend="${l.status.name() == 'ACTIVE'} ? 'tag-status' : 'tag-sold'"
+                          th:text="${l.status}">status</span>
+                    <span class="muted" th:text="${#numbers.formatInteger(l.price, 1, 'COMMA')} + ' mesos'">0</span>
+                </div>
+            </div>
+            <div class="row-actions" th:if="${l.status.name() == 'ACTIVE'}">
+                <a th:href="@{/listings/{id}/edit(id=${l.id})}" class="btn btn-sm btn-ghost">Edit</a>
+                <form th:action="@{/listings/{id}/sold(id=${l.id})}" method="post" class="inline-form">
+                    <button class="btn btn-sm btn-ghost">Sold</button>
+                </form>
+                <form th:action="@{/listings/{id}/cancel(id=${l.id})}" method="post" class="inline-form">
+                    <button class="btn btn-sm btn-danger">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

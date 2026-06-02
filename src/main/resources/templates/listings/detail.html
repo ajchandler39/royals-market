@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${listing.title})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <p><a th:href="@{/}">← Back to market</a></p>
+
+    <div class="detail">
+        <!-- Image -->
+        <div class="detail-img">
+            <img th:if="${listing.imageUrl}" th:src="${listing.imageUrl}" th:alt="${listing.title}"/>
+            <span th:unless="${listing.imageUrl}" class="placeholder">🎁</span>
+        </div>
+
+        <!-- Info -->
+        <div>
+            <div style="margin-bottom:0.6rem">
+                <span th:if="${listing.isAuction()}" class="tag tag-auction">Auction</span>
+                <span th:unless="${listing.isAuction()}" class="tag tag-sale">Sale</span>
+                <span class="tag tag-cat" th:text="${listing.category.label}">Category</span>
+                <span th:if="${listing.quantity > 1}" class="tag tag-cat" th:text="'Qty x' + ${listing.quantity}">x1</span>
+            </div>
+
+            <h1 th:text="${listing.title}" style="margin:0 0 0.4rem">Item</h1>
+
+            <!-- Status banners -->
+            <div th:if="${listing.status.name() == 'SOLD'}" class="flash flash-err" style="margin-bottom:1rem">
+                Sold<span th:if="${listing.finalPrice}" th:text="' for ' + ${#numbers.formatInteger(listing.finalPrice, 1, 'COMMA')} + ' mesos'"></span>.
+            </div>
+            <div th:if="${listing.status.name() == 'EXPIRED'}" class="flash flash-err" style="margin-bottom:1rem">
+                This auction ended with no winning bid.
+            </div>
+            <div th:if="${listing.status.name() == 'CANCELLED'}" class="flash flash-err" style="margin-bottom:1rem">
+                This listing was cancelled.
+            </div>
+
+            <!-- ============ SALE ============ -->
+            <div th:if="${!listing.isAuction()}">
+                <div class="price-big" th:text="${#numbers.formatInteger(listing.price, 1, 'COMMA')} + ' mesos'">0 mesos</div>
+            </div>
+
+            <!-- ============ AUCTION ============ -->
+            <div th:if="${listing.isAuction()}">
+                <div class="muted" style="font-size:0.85rem">Current bid</div>
+                <div class="price-big"
+                     th:text="${highestBid != null} ? ${#numbers.formatInteger(highestBid.amount, 1, 'COMMA')} + ' mesos'
+                              : ${#numbers.formatInteger(listing.price, 1, 'COMMA')} + ' mesos (starting)'">0</div>
+
+                <div th:if="${listing.status.name() == 'ACTIVE'}" style="margin-top:0.6rem"
+                     th:with="iso=${#temporals.format(listing.endsAt, 'yyyy-MM-dd''T''HH:mm:ss')}">
+                    <span class="muted" style="font-size:0.85rem">Ends in</span><br/>
+                    <span class="countdown" th:attr="x-data=|countdown('${iso}')|"
+                          x-text="label" x-bind:class="{ ended: ended }">…</span>
+                </div>
+                <div th:if="${listing.buyNowPrice != null and listing.status.name() == 'ACTIVE'}" class="muted" style="margin-top:0.5rem">
+                    Buy now: <strong th:text="${#numbers.formatInteger(listing.buyNowPrice, 1, 'COMMA')} + ' mesos'"></strong>
+                </div>
+            </div>
+
+            <!-- ============ Seller contact ============ -->
+            <div class="seller-box">
+                <div class="row">
+                    <span class="muted">Seller</span>
+                    <a th:href="@{/u/{u}(u=${listing.seller.username})}" th:text="${listing.seller.username}">seller</a>
+                </div>
+                <div class="row">
+                    <span class="muted">In-game name</span>
+                    <strong th:text="${listing.seller.ign != null} ? ${listing.seller.ign} : '— not set —'">IGN</strong>
+                </div>
+                <div class="row" th:if="${listing.seller.discordTag != null}">
+                    <span class="muted">Discord</span>
+                    <strong th:text="${listing.seller.discordTag}">discord</strong>
+                </div>
+            </div>
+
+            <p th:if="${listing.description}" th:text="${listing.description}" style="white-space:pre-wrap"></p>
+
+            <!-- ============ Owner controls ============ -->
+            <div th:if="${owner}" class="row-actions">
+                <span class="tag tag-status">This is your listing</span>
+                <a th:if="${listing.status.name() == 'ACTIVE'}" th:href="@{/listings/{id}/edit(id=${listing.id})}" class="btn btn-sm btn-ghost">Edit</a>
+                <form th:if="${listing.status.name() == 'ACTIVE'}" th:action="@{/listings/{id}/sold(id=${listing.id})}" method="post" class="inline-form">
+                    <button class="btn btn-sm btn-ghost">Mark sold</button>
+                </form>
+                <form th:if="${listing.status.name() == 'ACTIVE'}" th:action="@{/listings/{id}/cancel(id=${listing.id})}" method="post" class="inline-form">
+                    <button class="btn btn-sm btn-danger">Cancel</button>
+                </form>
+            </div>
+
+            <!-- ============ Buyer actions (active, not owner) ============ -->
+            <div th:if="${listing.status.name() == 'ACTIVE' and !owner}">
+                <hr class="divider"/>
+
+                <!-- Not logged in -->
+                <div th:if="${currentUser == null}">
+                    <a th:href="@{/login}" class="btn btn-gold btn-block">Log in to buy, bid, or message</a>
+                </div>
+
+                <div th:if="${currentUser != null}" class="stack">
+                    <!-- AUCTION: bid + buy-now -->
+                    <div th:if="${listing.isAuction()}">
+                        <form th:action="@{/listings/{id}/bids(id=${listing.id})}" th:object="${bidForm}" method="post">
+                            <label>Your bid (min <span th:text="${#numbers.formatInteger(minimumBid, 1, 'COMMA')}">0</span> mesos)</label>
+                            <div class="chat-form">
+                                <input type="number" th:field="*{amount}" th:min="${minimumBid}" th:value="${minimumBid}" required/>
+                                <button class="btn btn-purple">Place bid</button>
+                            </div>
+                        </form>
+                        <form th:if="${listing.buyNowPrice != null}" th:action="@{/listings/{id}/buy-now(id=${listing.id})}" method="post" style="margin-top:0.6rem">
+                            <button class="btn btn-gold btn-block">
+                                Buy now for <span th:text="${#numbers.formatInteger(listing.buyNowPrice, 1, 'COMMA')}">0</span> mesos
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- SALE: make offer -->
+                    <div th:if="${!listing.isAuction() and listing.allowOffers}">
+                        <form th:action="@{/listings/{id}/offers(id=${listing.id})}" th:object="${offerForm}" method="post" class="stack">
+                            <label>Make an offer</label>
+                            <input type="number" th:field="*{amount}" min="1" placeholder="Your offer in mesos" required/>
+                            <input type="text" th:field="*{message}" maxlength="500" placeholder="Optional note to the seller"/>
+                            <button class="btn btn-purple btn-block">Send offer</button>
+                        </form>
+                    </div>
+
+                    <!-- Message seller (always available) -->
+                    <form th:action="@{/listings/{id}/contact(id=${listing.id})}" method="post" class="stack">
+                        <label>Message the seller</label>
+                        <textarea name="body" maxlength="2000" placeholder="Hi! Is this still available?" required></textarea>
+                        <button class="btn btn-ghost btn-block">Send message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Auction bid history ============ -->
+    <div th:if="${listing.isAuction() and !#lists.isEmpty(bids)}" class="panel" style="margin-top:1.6rem">
+        <h2>Bid history</h2>
+        <ul class="bid-list">
+            <li th:each="b : ${bids}">
+                <span th:text="${b.bidder.username}">bidder</span>
+                <span th:text="${#numbers.formatInteger(b.amount, 1, 'COMMA')} + ' mesos'">0</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- ============ Offers (seller view) ============ -->
+    <div th:if="${owner and offers != null and !#lists.isEmpty(offers)}" class="panel" style="margin-top:1.6rem">
+        <h2>Offers received</h2>
+        <div class="offer-row" th:each="o : ${offers}">
+            <span class="amount" th:text="${#numbers.formatInteger(o.amount, 1, 'COMMA')} + ' mesos'">0</span>
+            <span th:text="'from ' + ${o.buyer.username}">from buyer</span>
+            <span class="muted" th:if="${o.message}" th:text="'“' + ${o.message} + '”'"></span>
+            <span class="tag" th:classappend="${o.status.name() == 'ACCEPTED'} ? 'tag-status' : 'tag-cat'"
+                  th:text="${o.status}" th:unless="${o.status.name() == 'PENDING'}">status</span>
+            <span style="flex:1"></span>
+            <div class="row-actions" th:if="${o.status.name() == 'PENDING' and listing.status.name() == 'ACTIVE'}">
+                <form th:action="@{/offers/{id}/accept(id=${o.id})}" method="post" class="inline-form">
+                    <button class="btn btn-sm btn-gold">Accept</button>
+                </form>
+                <form th:action="@{/offers/{id}/decline(id=${o.id})}" method="post" class="inline-form">
+                    <button class="btn btn-sm btn-ghost">Decline</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="grid" id="listing-grid">
+    <div th:if="${#lists.isEmpty(listings)}" class="empty">
+        <span class="big">🔍</span>
+        No listings match. Try a different search or category.
+    </div>
+
+    <div th:unless="${#lists.isEmpty(listings)}" class="grid">
+        <div class="card" th:each="l : ${listings}">
+            <a th:href="@{/listings/{id}(id=${l.id})}">
+                <div class="card-img">
+                    <img th:if="${l.imageUrl}" th:src="${l.imageUrl}" th:alt="${l.title}"/>
+                    <span th:unless="${l.imageUrl}" class="placeholder">🎁</span>
+                </div>
+            </a>
+            <div class="card-body">
+                <div>
+                    <span th:if="${l.type.name() == 'AUCTION'}" class="tag tag-auction">Auction</span>
+                    <span th:if="${l.type.name() == 'SALE'}" class="tag tag-sale">Sale</span>
+                    <span class="tag tag-cat" th:text="${l.category.label}">Category</span>
+                </div>
+                <a th:href="@{/listings/{id}(id=${l.id})}">
+                    <h3 class="card-title" th:text="${l.title}">Item title</h3>
+                </a>
+                <div class="card-price">
+                    <span th:if="${l.type.name() == 'AUCTION'}" class="muted" style="font-size:0.75rem;display:block;">Starting bid</span>
+                    <span th:text="${#numbers.formatInteger(l.price, 1, 'COMMA')} + ' mesos'">0 mesos</span>
+                </div>
+                <div class="card-meta">
+                    <span>by <a th:href="@{/u/{u}(u=${l.seller.username})}" th:text="${l.seller.username}">seller</a></span>
+                    <span th:if="${l.quantity > 1}" th:text="'x' + ${l.quantity}">x1</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

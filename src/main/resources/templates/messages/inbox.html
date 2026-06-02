@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Messages')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+
+<main class="container">
+    <h1>Messages</h1>
+
+    <div th:if="${#lists.isEmpty(conversations)}" class="empty">
+        <span class="big">💬</span> No conversations yet. Message a seller from any listing to start one.
+    </div>
+
+    <div class="convo-list" th:unless="${#lists.isEmpty(conversations)}">
+        <a class="convo-item" th:each="c : ${conversations}"
+           th:href="@{/messages/{id}(id=${c.id})}"
+           th:with="other=${c.other(me)}">
+            <div>
+                <strong th:text="${other.username}">other</strong>
+                <div class="muted" th:if="${c.listing != null}" style="font-size:0.82rem"
+                     th:text="'re: ' + ${c.listing.title}">re: listing</div>
+            </div>
+            <span class="muted" style="font-size:0.8rem"
+                  th:text="${#temporals.format(c.lastMessageAt, 'MMM d, HH:mm')}">time</span>
+        </a>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

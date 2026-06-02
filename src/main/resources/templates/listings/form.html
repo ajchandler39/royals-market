@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sell an item')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+
+<main class="container container-narrow">
+    <div class="panel"
+         th:with="postUrl=${editing} ? @{/listings/{id}/edit(id=${listingId})} : @{/listings}">
+        <h1 th:text="${editing} ? 'Edit listing' : 'List an item'">List an item</h1>
+
+        <form th:action="${postUrl}" th:object="${form}" method="post" class="stack"
+              th:attr="x-data=|{ type: '${form.type}' }|">
+
+            <div>
+                <label for="title">Title</label>
+                <input id="title" type="text" th:field="*{title}" required maxlength="120"
+                       placeholder="e.g. Clean Fafnir Mit Snail"/>
+                <div class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+            </div>
+
+            <div>
+                <label for="category">Category</label>
+                <select id="category" th:field="*{category}" required>
+                    <option th:each="c : ${allCategories}" th:value="${c}" th:text="${c.label}">Cat</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="description">Description</label>
+                <textarea id="description" th:field="*{description}" maxlength="4000"
+                          placeholder="Stats, clean/used, why it's worth it…"></textarea>
+            </div>
+
+            <div>
+                <label for="imageUrl">Image URL (optional)</label>
+                <input id="imageUrl" type="url" th:field="*{imageUrl}"
+                       placeholder="https://i.imgur.com/your-screenshot.png"/>
+                <div class="hint">Paste a link to a screenshot (e.g. imgur). Uploads aren't supported yet.</div>
+            </div>
+
+            <div>
+                <label for="quantity">Quantity</label>
+                <input id="quantity" type="number" th:field="*{quantity}" min="1" value="1"/>
+            </div>
+
+            <hr class="divider"/>
+
+            <div>
+                <label>Listing type</label>
+                <select th:field="*{type}" x-model="type" th:disabled="${editing}">
+                    <option value="SALE">Fixed-price sale</option>
+                    <option value="AUCTION">Timed auction</option>
+                </select>
+                <div class="hint" th:if="${editing}">Listing type can't be changed after creation.</div>
+            </div>
+
+            <!-- SALE fields -->
+            <template x-if="type === 'SALE'">
+                <div>
+                    <div>
+                        <label for="price">Price (mesos)</label>
+                        <input id="price" type="number" th:field="*{price}" min="0" placeholder="50000000"/>
+                    </div>
+                    <div class="checkbox-row">
+                        <input id="allowOffers" type="checkbox" th:field="*{allowOffers}"/>
+                        <label for="allowOffers">Accept best offers</label>
+                    </div>
+                </div>
+            </template>
+
+            <!-- AUCTION fields -->
+            <template x-if="type === 'AUCTION'">
+                <div>
+                    <div>
+                        <label for="startPrice">Starting bid (mesos)</label>
+                        <input id="startPrice" type="number" th:field="*{price}" min="0" placeholder="10000000"/>
+                    </div>
+                    <div>
+                        <label for="buyNowPrice">Buy-now price (optional)</label>
+                        <input id="buyNowPrice" type="number" th:field="*{buyNowPrice}" min="0"
+                               placeholder="Leave blank for none"/>
+                    </div>
+                    <div th:if="${!editing}">
+                        <label for="durationHours">Auction length</label>
+                        <select id="durationHours" th:field="*{durationHours}">
+                            <option value="6">6 hours</option>
+                            <option value="12">12 hours</option>
+                            <option value="24" selected>1 day</option>
+                            <option value="72">3 days</option>
+                            <option value="168">7 days</option>
+                        </select>
+                    </div>
+                </div>
+            </template>
+
+            <button type="submit" class="btn btn-gold btn-block" style="margin-top:1.4rem"
+                    th:text="${editing} ? 'Save changes' : 'Post listing'">Post listing</button>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

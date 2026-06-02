@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Something went wrong')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+
+<main class="container container-narrow">
+    <div class="panel" style="text-align:center">
+        <div style="font-size:3rem">⚠️</div>
+        <h1>Hmm…</h1>
+        <p class="muted" th:text="${message} ?: 'That action could not be completed.'">Error message.</p>
+        <a th:href="@{/}" class="btn btn-gold">Back to the market</a>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

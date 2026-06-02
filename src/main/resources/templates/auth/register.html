@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sign up')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+
+<main class="container container-narrow">
+    <div class="panel">
+        <h1>Create your account</h1>
+        <form th:action="@{/register}" th:object="${form}" method="post" class="stack">
+            <div>
+                <label for="username">Username</label>
+                <input id="username" type="text" th:field="*{username}" required/>
+                <div class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+            </div>
+            <div>
+                <label for="email">Email</label>
+                <input id="email" type="email" th:field="*{email}" required/>
+                <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            </div>
+            <div>
+                <label for="password">Password</label>
+                <input id="password" type="password" th:field="*{password}" required/>
+                <div class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+            </div>
+            <div>
+                <label for="confirmPassword">Confirm password</label>
+                <input id="confirmPassword" type="password" th:field="*{confirmPassword}" required/>
+                <div class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+            </div>
+            <hr class="divider"/>
+            <p class="hint">Optional now — you can add these later so buyers can reach you in-game.</p>
+            <div>
+                <label for="ign">In-game name (IGN)</label>
+                <input id="ign" type="text" th:field="*{ign}" placeholder="e.g. PinkBean"/>
+            </div>
+            <div>
+                <label for="discordTag">Discord tag</label>
+                <input id="discordTag" type="text" th:field="*{discordTag}" placeholder="e.g. you#1234"/>
+            </div>
+            <button type="submit" class="btn btn-gold btn-block" style="margin-top:1.2rem">Sign up</button>
+        </form>
+        <p class="hint" style="margin-top:1rem">
+            Already have an account? <a th:href="@{/login}">Log in</a>
+        </p>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

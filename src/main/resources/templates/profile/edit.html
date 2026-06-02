@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Edit profile')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+
+<main class="container container-narrow">
+    <div class="panel">
+        <h1>Edit profile</h1>
+        <p class="hint">These let buyers reach you to complete trades in-game.</p>
+        <form th:action="@{/profile/edit}" th:object="${form}" method="post" class="stack">
+            <div>
+                <label for="ign">In-game name (IGN)</label>
+                <input id="ign" type="text" th:field="*{ign}" placeholder="e.g. PinkBean"/>
+                <div class="field-error" th:if="${#fields.hasErrors('ign')}" th:errors="*{ign}"></div>
+            </div>
+            <div>
+                <label for="discordTag">Discord tag</label>
+                <input id="discordTag" type="text" th:field="*{discordTag}" placeholder="e.g. you#1234"/>
+                <div class="field-error" th:if="${#fields.hasErrors('discordTag')}" th:errors="*{discordTag}"></div>
+            </div>
+            <button type="submit" class="btn btn-gold btn-block" style="margin-top:1.2rem">Save</button>
+        </form>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

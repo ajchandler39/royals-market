@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Browse the market')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <section class="hero">
+        <h1><span style="color:var(--gold)">♛</span> RoyalsMarket</h1>
+        <p>Buy, sell, and auction your MapleStory items — trades happen in-game.</p>
+    </section>
+
+    <form class="toolbar" th:action="@{/}" method="get"
+          hx-get="/browse" hx-target="#listing-grid" hx-push-url="false"
+          hx-trigger="submit, keyup changed delay:400ms from:[name='q'], change from:select">
+        <input class="search" type="text" name="q" th:value="${q}" placeholder="Search items…"/>
+        <select name="category">
+            <option value="">All categories</option>
+            <option th:each="c : ${allCategories}" th:value="${c}" th:text="${c.label}"
+                    th:selected="${selectedCategory != null and selectedCategory == c}">Cat</option>
+        </select>
+        <select name="type">
+            <option value="">Sales &amp; auctions</option>
+            <option th:each="t : ${allTypes}" th:value="${t}" th:text="${t}"
+                    th:selected="${selectedType != null and selectedType == t}">Type</option>
+        </select>
+        <select name="sort">
+            <option value="">Newest</option>
+            <option value="price_asc" th:selected="${sort == 'price_asc'}">Price: low to high</option>
+            <option value="price_desc" th:selected="${sort == 'price_desc'}">Price: high to low</option>
+            <option value="ending" th:selected="${sort == 'ending'}">Auctions ending soon</option>
+        </select>
+        <button type="submit" class="btn btn-sm btn-purple">Search</button>
+    </form>
+
+    <div th:replace="~{fragments/listing-grid :: grid}"></div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

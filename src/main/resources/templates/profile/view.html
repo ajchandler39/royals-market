@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${profileUser.username})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <div class="panel">
+        <div class="row-actions" style="justify-content:space-between">
+            <h1 th:text="${profileUser.username}" style="margin:0">user</h1>
+            <a th:if="${currentUser != null and currentUser.id == profileUser.id}"
+               th:href="@{/profile/edit}" class="btn btn-sm btn-ghost">Edit profile</a>
+        </div>
+        <div class="seller-box" style="margin-top:1rem">
+            <div class="row">
+                <span class="muted">In-game name</span>
+                <strong th:text="${profileUser.ign != null} ? ${profileUser.ign} : '— not set —'">IGN</strong>
+            </div>
+            <div class="row">
+                <span class="muted">Discord</span>
+                <strong th:text="${profileUser.discordTag != null} ? ${profileUser.discordTag} : '— not set —'">discord</strong>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="margin-top:1.6rem">Active listings</h2>
+    <div th:if="${#lists.isEmpty(listings)}" class="empty">
+        <span class="big">📦</span> No active listings.
+    </div>
+    <div th:unless="${#lists.isEmpty(listings)}" th:replace="~{fragments/listing-grid :: grid}"></div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
