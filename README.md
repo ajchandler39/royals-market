@@ -1,5 +1,7 @@
 # ♛ RoyalsMarket
 
+[![CI](https://github.com/ajchandler39/royalsmarket/actions/workflows/ci.yml/badge.svg)](https://github.com/ajchandler39/royalsmarket/actions/workflows/ci.yml)
+
 A standalone web marketplace for a MapleStory private server — a modern replacement for the
 "selling" section of a forum. Players post items for **fixed-price sale** or **timed auction**,
 browse and search listings, and arrange the actual trade in-game. RoyalsMarket has no connection
@@ -20,6 +22,7 @@ to the game server; it's purely the listing/discovery/negotiation layer.
 - **Offers** — buyers can submit best offers on sale listings; sellers accept or decline.
 - **Messaging** — in-site conversations between buyer and seller, with unread counts.
 - **Seller dashboard** — manage your listings (edit, mark sold, cancel) and review bids/offers.
+- **JSON REST API** — `/api/**` with OpenAPI/Swagger docs (reads public, writes via HTTP Basic).
 
 ## Tech stack
 
@@ -28,8 +31,41 @@ to the game server; it's purely the listing/discovery/negotiation layer.
 | Language  | Java 21                                                           |
 | Framework | Spring Boot 4.0 (Web MVC, Data JPA, Security, Validation)         |
 | Views     | Thymeleaf + HTMX + Alpine.js (CDN), custom CSS                    |
-| Database  | H2 file DB (dev) · PostgreSQL (prod, via the `prod` profile)      |
+| API docs  | springdoc-openapi / Swagger UI                                    |
+| Database  | H2 file DB (dev) · PostgreSQL (prod) · Flyway migrations          |
+| Testing   | JUnit 5, Mockito, MockMvc, Testcontainers (PostgreSQL)            |
+| CI        | GitHub Actions (build + test on every push)                       |
 | Build     | Maven (wrapper included — no separate Maven install needed)       |
+
+## REST API
+
+A JSON API mirrors the web features (handy for tooling/integrations):
+
+| Method | Path                          | Auth | Description                |
+|--------|-------------------------------|------|----------------------------|
+| GET    | `/api/listings`               | —    | Browse (q/category/type/sort) |
+| GET    | `/api/listings/{id}`          | —    | Listing detail             |
+| POST   | `/api/listings`               | ✓    | Create a listing           |
+| GET    | `/api/listings/{id}/bids`     | —    | Bid history                |
+| POST   | `/api/listings/{id}/bids`     | ✓    | Place a bid                |
+
+- **Swagger UI:** <http://localhost:8080/swagger-ui.html> · **OpenAPI JSON:** `/v3/api-docs`
+- Writes use HTTP Basic, e.g.:
+  ```bash
+  curl -u zakum:password -H 'Content-Type: application/json' \
+    -d '{"amount":150000000}' http://localhost:8080/api/listings/4/bids
+  ```
+
+## Testing
+
+```bash
+./mvnw verify
+```
+
+- **Unit** — `BidServiceTest` covers bid validation / outbid / buy-now rules with Mockito.
+- **Integration (H2)** — `ListingApiIntegrationTest` drives the API through MockMvc + Spring Security.
+- **Integration (PostgreSQL)** — `PostgresIntegrationTest` boots the app against a real Postgres
+  container via Testcontainers (runs in CI; auto-skipped locally when Docker isn't available).
 
 ## Run locally (H2, zero setup)
 

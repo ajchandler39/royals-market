@@ -2,11 +2,15 @@ package com.royalsmarket.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
@@ -17,14 +21,41 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Stateless JSON API chain. Reads are public; writes use HTTP Basic auth.
+     * CSRF is disabled because there's no browser session/cookie to protect.
+     */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Order(1)
+    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+        BasicAuthenticationEntryPoint entryPoint = new BasicAuthenticationEntryPoint();
+        entryPoint.setRealmName("RoyalsMarket API");
+        http
+                .securityMatcher("/api/**")
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
+                        .anyRequest().authenticated())
+                .httpBasic(basic -> basic.authenticationEntryPoint(entryPoint))
+                // No form login on the API chain — unauthenticated calls get a clean 401, not a redirect.
+                .formLogin(form -> form.disable())
+                .logout(logout -> logout.disable())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(entryPoint));
+        return http.build();
+    }
+
+    /** Session-based web (Thymeleaf) chain with form login. */
+    @Bean
+    @Order(2)
+    public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        // Static assets + dev tools
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**",
-                                "/favicon.ico", "/h2-console/**").permitAll()
+                                "/favicon.ico", "/h2-console/**", "/error").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
+                        // API docs (springdoc) are public.
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Authenticated areas — declared BEFORE the public /listings/* matcher
                         // so they take precedence (first match wins).
                         .requestMatchers("/listings/new", "/listings/mine").authenticated()
@@ -32,8 +63,7 @@ public class SecurityConfig {
                                 "/listings/*/offers", "/listings/*/sold", "/listings/*/cancel",
                                 "/listings/*/contact").authenticated()
                         .requestMatchers("/offers/**", "/profile/**", "/messages/**").authenticated()
-                        // Public pages (method-agnostic; the only writes under these paths are the
-                        // authenticated action endpoints matched above, plus POST /register here).
+                        // Public pages.
                         .requestMatchers("/", "/browse", "/login", "/register",
                                 "/listings/*", "/u/*").permitAll()
                         .anyRequest().authenticated())
