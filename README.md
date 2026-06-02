@@ -1,6 +1,6 @@
 # ♛ RoyalsMarket
 
-[![CI](https://github.com/ajchandler39/royalsmarket/actions/workflows/ci.yml/badge.svg)](https://github.com/ajchandler39/royalsmarket/actions/workflows/ci.yml)
+[![CI](https://github.com/ajchandler39/royals-market/actions/workflows/ci.yml/badge.svg)](https://github.com/ajchandler39/royals-market/actions/workflows/ci.yml)
 
 A standalone web marketplace for a MapleStory private server — a modern replacement for the
 "selling" section of a forum. Players post items for **fixed-price sale** or **timed auction**,
