@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/ajchandler39/royals-market/actions/workflows/ci.yml/badge.svg)](https://github.com/ajchandler39/royals-market/actions/workflows/ci.yml)
 
+**🔗 Live demo: [royals-market-production.up.railway.app](https://royals-market-production.up.railway.app)** — try the demo login `pinkbean` / `password`.
+
 A standalone web marketplace for a MapleStory private server — a modern replacement for the
 "selling" section of a forum. Players post items for **fixed-price sale** or **timed auction**,
 browse and search listings, and arrange the actual trade in-game. RoyalsMarket has no connection

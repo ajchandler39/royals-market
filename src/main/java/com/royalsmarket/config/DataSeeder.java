@@ -5,15 +5,17 @@ import com.royalsmarket.repository.ListingRepository;
 import com.royalsmarket.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-/** Seeds a couple of demo accounts and listings for local development. */
+/**
+ * Seeds demo accounts and listings. Runs in every profile (including prod) so the public
+ * demo deployment shows content and the demo logins work. Idempotent: only seeds when the
+ * database is empty, so it never overwrites real data or re-runs on redeploys.
+ */
 @Component
-@Profile("!prod")
 @RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 
