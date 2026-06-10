@@ -33,7 +33,7 @@ class ListingApiIntegrationTest {
     void browseIsPublicAndReturnsSeededListings() throws Exception {
         mvc.perform(get("/api/listings"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Fafnir")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Pink Adventurer Cape")));
     }
 
     @Test

@@ -10,26 +10,51 @@
         <h1 th:text="${editing} ? 'Edit listing' : 'List an item'">List an item</h1>
 
         <form th:action="${postUrl}" th:object="${form}" method="post" class="stack"
-              th:attr="x-data=|{ type: '${form.type}' }|">
+              th:attr="x-data=|listingForm('${form.type}')|" x-init="syncItem($refs.itemSel)">
 
+            <!-- Item picker -->
             <div>
-                <label for="title">Title</label>
-                <input id="title" type="text" th:field="*{title}" required maxlength="120"
-                       placeholder="e.g. Clean Fafnir Mit Snail"/>
-                <div class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
-            </div>
-
-            <div>
-                <label for="category">Category</label>
-                <select id="category" th:field="*{category}" required>
-                    <option th:each="c : ${allCategories}" th:value="${c}" th:text="${c.label}">Cat</option>
+                <label for="catalogItemId">Item</label>
+                <select id="catalogItemId" th:field="*{catalogItemId}" required
+                        x-ref="itemSel" x-on:change="syncItem($event.target)">
+                    <option value="" disabled>— choose an item —</option>
+                    <optgroup th:each="cat : ${allCategories}" th:label="${cat.label}">
+                        <option th:each="item : ${catalogItems}" th:if="${item.category == cat}"
+                                th:value="${item.id}"
+                                th:attr="data-stats=${#strings.setJoin(item.applicableStats(), ',')},data-gear=${item.gear}"
+                                th:text="${item.itemClass != null} ? ${item.name} + ' (' + ${item.itemClass.label} + ')' : ${item.name}">Item</option>
+                    </optgroup>
                 </select>
+                <div class="field-error" th:if="${#fields.hasErrors('catalogItemId')}" th:errors="*{catalogItemId}"></div>
+                <div class="hint">Pick the item you're selling. Stat fields below adjust to the item type.</div>
+            </div>
+
+            <!-- Stats (gear only; each field shows only if it applies to the chosen item) -->
+            <div x-show="gear" x-cloak>
+                <label>Stats <span class="hint">(fill in what applies; leave blank for 0)</span></label>
+                <div class="stat-grid">
+                    <div th:each="stat : ${allStats}" th:attr="x-show=|stats.includes('${stat}')|" x-cloak>
+                        <label th:text="${stat.label}" style="margin:0 0 0.2rem">STR</label>
+                        <input type="number" th:field="*{stats[__${stat}__]}" placeholder="0"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slots (gear only) -->
+            <div x-show="gear" x-cloak>
+                <label for="slotsRemaining">Upgrade slots remaining</label>
+                <input id="slotsRemaining" type="number" th:field="*{slotsRemaining}" min="0" placeholder="e.g. 7"/>
             </div>
 
             <div>
-                <label for="description">Description</label>
-                <textarea id="description" th:field="*{description}" maxlength="4000"
-                          placeholder="Stats, clean/used, why it's worth it…"></textarea>
+                <label for="quantity">Quantity</label>
+                <input id="quantity" type="number" th:field="*{quantity}" min="1" value="1"/>
+            </div>
+
+            <div>
+                <label for="description">Notes (optional)</label>
+                <textarea id="description" th:field="*{description}" maxlength="2000"
+                          placeholder="Anything the structured fields don't cover (obscure stats, trade preferences…)"></textarea>
             </div>
 
             <div>
@@ -37,11 +62,6 @@
                 <input id="imageUrl" type="url" th:field="*{imageUrl}"
                        placeholder="https://i.imgur.com/your-screenshot.png"/>
                 <div class="hint">Paste a link to a screenshot (e.g. imgur). Uploads aren't supported yet.</div>
-            </div>
-
-            <div>
-                <label for="quantity">Quantity</label>
-                <input id="quantity" type="number" th:field="*{quantity}" min="1" value="1"/>
             </div>
 
             <hr class="divider"/>

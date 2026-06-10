@@ -2,6 +2,7 @@ package com.royalsmarket.config;
 
 import com.royalsmarket.entity.ItemCategory;
 import com.royalsmarket.entity.ListingType;
+import com.royalsmarket.entity.StatType;
 import com.royalsmarket.entity.User;
 import com.royalsmarket.service.CurrentUserService;
 import com.royalsmarket.service.MessageService;
@@ -35,5 +36,10 @@ public class GlobalModelAdvice {
     @ModelAttribute("allTypes")
     public ListingType[] allTypes() {
         return ListingType.values();
+    }
+
+    @ModelAttribute("allStats")
+    public StatType[] allStats() {
+        return StatType.values();
     }
 }

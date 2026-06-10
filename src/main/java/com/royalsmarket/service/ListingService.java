@@ -2,6 +2,7 @@ package com.royalsmarket.service;
 
 import com.royalsmarket.dto.ListingForm;
 import com.royalsmarket.entity.*;
+import com.royalsmarket.repository.CatalogItemRepository;
 import com.royalsmarket.repository.ListingRepository;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -12,13 +13,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class ListingService {
 
     private final ListingRepository listingRepository;
+    private final CatalogItemRepository catalogItemRepository;
 
     /** Public browse with optional keyword, category, type filters and a sort key. */
     public List<Listing> browse(String q, ItemCategory category, ListingType type, String sort) {
@@ -28,11 +32,11 @@ public class ListingService {
             if (q != null && !q.isBlank()) {
                 String like = "%" + q.trim().toLowerCase() + "%";
                 ps.add(cb.or(
-                        cb.like(cb.lower(root.get("title")), like),
+                        cb.like(cb.lower(root.get("item").get("name")), like),
                         cb.like(cb.lower(root.get("description")), like)));
             }
             if (category != null) {
-                ps.add(cb.equal(root.get("category"), category));
+                ps.add(cb.equal(root.get("item").get("category"), category));
             }
             if (type != null) {
                 ps.add(cb.equal(root.get("type"), type));
@@ -117,8 +121,9 @@ public class ListingService {
     }
 
     private void apply(ListingForm f, Listing l) {
-        l.setTitle(f.getTitle().trim());
-        l.setCategory(f.getCategory());
+        CatalogItem item = catalogItemRepository.findById(f.getCatalogItemId())
+                .orElseThrow(() -> new DomainException("Choose a valid item."));
+        l.setItem(item);
         l.setDescription(blankToNull(f.getDescription()));
         l.setImageUrl(blankToNull(f.getImageUrl()));
         l.setQuantity(Math.max(1, f.getQuantity()));
@@ -126,6 +131,23 @@ public class ListingService {
         l.setPrice(f.getPrice());
         l.setBuyNowPrice(f.getBuyNowPrice());
         l.setAllowOffers(f.isAllowOffers());
+
+        // Keep only stats applicable to this item's equip type, with a meaningful (non-zero) value.
+        Map<StatType, Integer> kept = new LinkedHashMap<>();
+        if (item.isGear()) {
+            Map<StatType, Integer> submitted = f.getStats() == null ? Map.of() : f.getStats();
+            for (StatType stat : item.applicableStats()) {
+                Integer v = submitted.get(stat);
+                if (v != null && v != 0) {
+                    kept.put(stat, v);
+                }
+            }
+            l.setSlotsRemaining(f.getSlotsRemaining());
+        } else {
+            l.setSlotsRemaining(null);
+        }
+        l.getStats().clear();
+        l.getStats().putAll(kept);
     }
 
     private static String blankToNull(String s) {

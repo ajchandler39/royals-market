@@ -60,6 +60,24 @@
                 </div>
             </div>
 
+            <!-- ============ Item stats ============ -->
+            <div th:if="${listing.gear}" style="margin-top:0.9rem">
+                <div class="muted" style="font-size:0.85rem">
+                    <span th:text="${listing.item.equipType.label}">Cape</span><span
+                          th:if="${listing.item.itemClass != null}" th:text="' · ' + ${listing.item.itemClass.label}"></span>
+                    <span th:if="${listing.slotsRemaining != null}" class="slots-pill" style="margin-left:0.4rem"
+                          th:text="${listing.slotsRemaining} + ' slots left'">7 slots left</span>
+                </div>
+                <div class="stat-chips" th:if="${!listing.stats.isEmpty()}">
+                    <span class="stat-chip" th:each="entry : ${listing.stats}">
+                        <span th:text="${entry.key.label}">STR</span>: <b th:text="${entry.value}">0</b>
+                    </span>
+                </div>
+                <div class="muted" th:if="${listing.stats.isEmpty()}" style="font-size:0.85rem; margin-top:0.3rem">
+                    No bonus stats listed (clean / base item).
+                </div>
+            </div>
+
             <!-- ============ Seller contact ============ -->
             <div class="seller-box">
                 <div class="row">
@@ -76,7 +94,10 @@
                 </div>
             </div>
 
-            <p th:if="${listing.description}" th:text="${listing.description}" style="white-space:pre-wrap"></p>
+            <div th:if="${listing.description}" style="margin-top:0.6rem">
+                <div class="muted" style="font-size:0.85rem">Notes</div>
+                <p th:text="${listing.description}" style="white-space:pre-wrap; margin:0.2rem 0 0"></p>
+            </div>
 
             <!-- ============ Owner controls ============ -->
             <div th:if="${owner}" class="row-actions">

@@ -36,4 +36,21 @@ document.addEventListener('alpine:init', function () {
             }
         };
     });
+
+    // Listing form: toggles SALE/AUCTION fields and shows only the stat fields that apply
+    // to the currently selected catalog item (read from the <option>'s data attributes).
+    window.Alpine.data('listingForm', function (initialType) {
+        return {
+            type: initialType || 'SALE',
+            stats: [],   // applicable stat names for the selected item
+            gear: false,
+            syncItem: function (select) {
+                var opt = select && select.selectedOptions ? select.selectedOptions[0] : null;
+                if (!opt || !opt.value) { this.stats = []; this.gear = false; return; }
+                var s = opt.getAttribute('data-stats') || '';
+                this.stats = s ? s.split(',') : [];
+                this.gear = opt.getAttribute('data-gear') === 'true';
+            }
+        };
+    });
 });

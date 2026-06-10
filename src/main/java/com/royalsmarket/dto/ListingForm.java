@@ -1,26 +1,33 @@
 package com.royalsmarket.dto;
 
-import com.royalsmarket.entity.ItemCategory;
 import com.royalsmarket.entity.ListingType;
+import com.royalsmarket.entity.StatType;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @Getter
 @Setter
 public class ListingForm {
 
-    @NotBlank
-    @Size(max = 120)
-    private String title;
-
+    /** The catalog item being listed. */
     @NotNull
-    private ItemCategory category;
+    private Long catalogItemId;
 
-    @Size(max = 4000)
+    /** Structured stat values keyed by stat type; only those applicable to the item are kept. */
+    private Map<StatType, Integer> stats = new LinkedHashMap<>();
+
+    /** Gear only: upgrade (scroll) slots remaining. */
+    @Min(0)
+    private Integer slotsRemaining;
+
+    /** Optional notes (e.g. obscure stats). */
+    @Size(max = 2000)
     private String description;
 
     @Size(max = 500)

@@ -1,14 +1,13 @@
 package com.royalsmarket.entity;
 
 /**
- * MapleStory-flavored item categories for listings.
+ * Top-level item grouping. GEAR items also carry an {@link EquipType} (which drives their
+ * stat fields); the rest are stat-less item types.
  */
 public enum ItemCategory {
-    WEAPON("Weapon"),
-    ARMOR("Armor"),
-    ACCESSORY("Accessory"),
+    GEAR("Gear"),
     SCROLL("Scroll"),
-    USE_ITEM("Use / Consumable"),
+    USE("Use / Consumable"),
     CHAIR("Chair"),
     PET("Pet"),
     MOUNT("Mount"),
@@ -24,5 +23,9 @@ public enum ItemCategory {
 
     public String getLabel() {
         return label;
+    }
+
+    public boolean isGear() {
+        return this == GEAR;
     }
 }

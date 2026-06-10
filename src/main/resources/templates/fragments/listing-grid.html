@@ -25,12 +25,18 @@
                 <a th:href="@{/listings/{id}(id=${l.id})}">
                     <h3 class="card-title" th:text="${l.title}">Item title</h3>
                 </a>
+                <div class="stat-chips" th:if="${l.gear and !l.stats.isEmpty()}">
+                    <span class="stat-chip" th:each="entry : ${l.stats}">
+                        <span th:text="${entry.key.label}">STR</span> <b th:text="${entry.value}">0</b>
+                    </span>
+                </div>
                 <div class="card-price">
                     <span th:if="${l.type.name() == 'AUCTION'}" class="muted" style="font-size:0.75rem;display:block;">Starting bid</span>
                     <span th:text="${#numbers.formatInteger(l.price, 1, 'COMMA')} + ' mesos'">0 mesos</span>
                 </div>
                 <div class="card-meta">
                     <span>by <a th:href="@{/u/{u}(u=${l.seller.username})}" th:text="${l.seller.username}">seller</a></span>
+                    <span th:if="${l.slotsRemaining != null}" class="slots-pill" th:text="${l.slotsRemaining} + ' slot' + (${l.slotsRemaining} == 1 ? '' : 's')">7 slots</span>
                     <span th:if="${l.quantity > 1}" th:text="'x' + ${l.quantity}">x1</span>
                 </div>
             </div>

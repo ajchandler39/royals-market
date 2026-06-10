@@ -267,3 +267,32 @@ textarea { resize: vertical; min-height: 90px; }
     .detail { grid-template-columns: 1fr; }
     .hero h1 { font-size: 1.8rem; }
 }
+
+/* ---------- Item stats ---------- */
+[x-cloak] { display: none !important; }
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.3rem;
+}
+.stat-grid label { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+.stat-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.4rem 0; }
+.stat-chip {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+.stat-chip b { color: var(--gold); font-weight: 700; }
+.slots-pill {
+    display: inline-block;
+    background: rgba(124, 77, 255, 0.18);
+    color: var(--purple-bright);
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+}

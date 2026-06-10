@@ -6,6 +6,7 @@ import com.royalsmarket.dto.OfferForm;
 import com.royalsmarket.entity.Listing;
 import com.royalsmarket.entity.ListingType;
 import com.royalsmarket.entity.User;
+import com.royalsmarket.repository.CatalogItemRepository;
 import com.royalsmarket.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class ListingController {
     private final BidService bidService;
     private final OfferService offerService;
     private final CurrentUserService currentUserService;
+    private final CatalogItemRepository catalogItemRepository;
 
     @GetMapping("/new")
     public String newForm(Model model) {
@@ -31,6 +33,7 @@ public class ListingController {
             model.addAttribute("form", new ListingForm());
         }
         model.addAttribute("editing", false);
+        addCatalog(model);
         return "listings/form";
     }
 
@@ -40,6 +43,7 @@ public class ListingController {
                         Model model) {
         if (binding.hasErrors()) {
             model.addAttribute("editing", false);
+            addCatalog(model);
             return "listings/form";
         }
         Listing listing = listingService.create(form, currentUserService.require());
@@ -88,6 +92,7 @@ public class ListingController {
         }
         model.addAttribute("editing", true);
         model.addAttribute("listingId", id);
+        addCatalog(model);
         return "listings/form";
     }
 
@@ -99,6 +104,7 @@ public class ListingController {
         if (binding.hasErrors()) {
             model.addAttribute("editing", true);
             model.addAttribute("listingId", id);
+            addCatalog(model);
             return "listings/form";
         }
         listingService.update(id, form, currentUserService.require());
@@ -119,10 +125,15 @@ public class ListingController {
         return "redirect:/listings/mine";
     }
 
+    private void addCatalog(Model model) {
+        model.addAttribute("catalogItems", catalogItemRepository.findAllByOrderByCategoryAscNameAsc());
+    }
+
     private ListingForm toForm(Listing l) {
         ListingForm f = new ListingForm();
-        f.setTitle(l.getTitle());
-        f.setCategory(l.getCategory());
+        f.setCatalogItemId(l.getItem() != null ? l.getItem().getId() : null);
+        f.getStats().putAll(l.getStats());
+        f.setSlotsRemaining(l.getSlotsRemaining());
         f.setDescription(l.getDescription());
         f.setImageUrl(l.getImageUrl());
         f.setQuantity(l.getQuantity());
