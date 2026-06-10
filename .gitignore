@@ -37,3 +37,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Stray nested clone guard
+/martial-arts-app/
