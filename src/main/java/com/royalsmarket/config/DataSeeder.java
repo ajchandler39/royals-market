@@ -55,17 +55,8 @@ public class DataSeeder implements CommandLineRunner {
                 gear("Dragon Khanjar", EquipType.WEAPON, ItemClass.THIEF),
                 gear("Mithril Bow", EquipType.WEAPON, ItemClass.BOWMAN),
                 gear("Maple Pyrope Knuckle", EquipType.WEAPON, ItemClass.PIRATE),
-                other("60% Cape for LUK Scroll", ItemCategory.SCROLL),
-                other("10% Glove for ATT Scroll", ItemCategory.SCROLL),
-                other("30% Helmet for INT Scroll", ItemCategory.SCROLL),
-                other("Chaos Scroll", ItemCategory.SCROLL),
-                other("Onyx Apple", ItemCategory.USE),
-                other("Power Elixir", ItemCategory.USE),
-                other("Maple Leaf Chair", ItemCategory.CHAIR),
-                other("Relaxer", ItemCategory.CHAIR),
-                other("Mesos", ItemCategory.MESOS),
-                other("Zakum Run (Service)", ItemCategory.SERVICE),
-                other("Robo (Pet)", ItemCategory.PET)));
+                // High-value market only (>= 100M): gear + Chaos Scrolls. No cheap scrolls/potions/etc. yet.
+                other("Chaos Scroll", ItemCategory.SCROLL)));
     }
 
     // ---------- Users ----------
@@ -91,20 +82,19 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
 
-        Listing cape = sale(pinkbean, items.get("Pink Adventurer Cape"), 1, 40_000_000L, true,
-                "Clean except a couple LUK scrolls. Make an offer.");
+        Listing cape = sale(pinkbean, items.get("Pink Adventurer Cape"), 1, 150_000_000L, true,
+                "Scrolled for LUK. Make an offer.");
         cape.setSlotsRemaining(3);
         cape.getStats().put(StatType.LUK, 5);
         listingRepository.save(cape);
 
-        Listing sword = sale(pinkbean, items.get("Stonetooth Sword"), 1, 850_000_000L, false,
-                null);
+        Listing sword = sale(pinkbean, items.get("Stonetooth Sword"), 1, 850_000_000L, false, null);
         sword.setSlotsRemaining(0);
         sword.getStats().put(StatType.WATK, 121);
         listingRepository.save(sword);
 
-        listingRepository.save(sale(pinkbean, items.get("60% Cape for LUK Scroll"), 10, 12_000_000L, false,
-                "Bulk lot of ten."));
+        listingRepository.save(sale(pinkbean, items.get("Chaos Scroll"), 5, 120_000_000L, false,
+                "Bulk lot of five Chaos Scrolls."));
 
         Listing helm = auction(pinkbean, items.get("Zakum Helmet"), 200_000_000L, null, 24);
         helm.setSlotsRemaining(1);
@@ -112,7 +102,10 @@ public class DataSeeder implements CommandLineRunner {
         helm.getStats().put(StatType.MDEF, 30);
         listingRepository.save(helm);
 
-        listingRepository.save(auction(pinkbean, items.get("Maple Leaf Chair"), 100_000_000L, 500_000_000L, 24));
+        Listing mapleCape = auction(pinkbean, items.get("Maple Cape"), 100_000_000L, 400_000_000L, 24);
+        mapleCape.setSlotsRemaining(2);
+        mapleCape.getStats().put(StatType.LUK, 8);
+        listingRepository.save(mapleCape);
 
         // (zakum is left without listings so the demo has a clean buyer account.)
     }

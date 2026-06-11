@@ -39,12 +39,12 @@ public class ListingForm {
     @NotNull
     private ListingType type = ListingType.SALE;
 
-    /** SALE: asking price. AUCTION: starting bid. */
-    @Min(0)
+    /** SALE: asking price. AUCTION: starting bid. Minimum 100M mesos (high-value market). */
+    @Min(value = 100_000_000L, message = "Listings must be priced at least 100,000,000 mesos.")
     private long price;
 
     /** AUCTION only, optional. */
-    @Min(0)
+    @Min(value = 100_000_000L, message = "Buy-now price must be at least 100,000,000 mesos.")
     private Long buyNowPrice;
 
     /** SALE only. */

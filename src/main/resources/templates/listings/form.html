@@ -80,7 +80,9 @@
                 <div>
                     <div>
                         <label for="price">Price (mesos)</label>
-                        <input id="price" type="number" th:field="*{price}" min="0" placeholder="50000000"/>
+                        <input id="price" type="number" th:field="*{price}" min="100000000" step="1000000" placeholder="100000000"/>
+                        <div class="hint">Minimum 100,000,000 mesos — RoyalsMarket is for high-value trades.</div>
+                        <div class="field-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
                     </div>
                     <div class="checkbox-row">
                         <input id="allowOffers" type="checkbox" th:field="*{allowOffers}"/>
@@ -94,12 +96,15 @@
                 <div>
                     <div>
                         <label for="startPrice">Starting bid (mesos)</label>
-                        <input id="startPrice" type="number" th:field="*{price}" min="0" placeholder="10000000"/>
+                        <input id="startPrice" type="number" th:field="*{price}" min="100000000" step="1000000" placeholder="100000000"/>
+                        <div class="hint">Minimum 100,000,000 mesos.</div>
+                        <div class="field-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
                     </div>
                     <div>
                         <label for="buyNowPrice">Buy-now price (optional)</label>
-                        <input id="buyNowPrice" type="number" th:field="*{buyNowPrice}" min="0"
+                        <input id="buyNowPrice" type="number" th:field="*{buyNowPrice}" min="100000000" step="1000000"
                                placeholder="Leave blank for none"/>
+                        <div class="field-error" th:if="${#fields.hasErrors('buyNowPrice')}" th:errors="*{buyNowPrice}"></div>
                     </div>
                     <div th:if="${!editing}">
                         <label for="durationHours">Auction length</label>
